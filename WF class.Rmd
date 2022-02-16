@@ -1,0 +1,58 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+
+#SOURCE: https://data.cms.gov/covid-19/covid-19-nursing-home-data
+library(readr)
+COVID_19_Nursing_Home_Data_11_28_2021 <- read_csv("~/Downloads/COVID-19 Nursing Home Data 01.30.2022.csv", 
+    col_types = cols(`Week Ending` = col_date(format = "%m/%d/%y")))
+#View(COVID_19_Nursing_Home_Data_11_28_2021)
+```
+
+```{r}
+since_vaccines<- 
+COVID_19_Nursing_Home_Data_11_28_2021 %>% filter(`Week Ending` > "2020-12-13")
+
+```
+
+
+```{r}
+nc_since_vaccines <- since_vaccines %>% filter(`Provider State` == "NC")
+```
+
+
+```{r}
+count<- as.data.frame(colSums(is.na(nc_since_vaccines)))
+
+names(count) <- c("missing")
+count$variable_names <- row.names(count)
+rownames(count) <- NULL
+
+```
+
+
+
+```{r}
+half<- nrow(nc_since_vaccines) /2
+
+not_missing <- count %>% filter(missing < half)
+
+```
+
+
+```{r}
+thin_since_vax <- nc_since_vaccines %>% select(not_missing$variable_names)
+```
+
+```{r}
+write.csv(thin_since_vax, "nc_cleaned_nursing_home_covid_data_220130.csv")
+```
+
+
